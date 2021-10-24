@@ -1,31 +1,30 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : Character
 {
 
     // Horizontal movement
-    private float _horizontalInput; // Horizontal movement input
+    private float _horizontalInput;
 
     // Jumping
-    private int _numberOfJumps; // Player's current number of jumps
-    private int _maxJumps = 2; // Player's maximum number of jumps
+    private int _numberOfJumps;
+    private int _maxJumps = 2;
     private bool _wantsToJump = false; // Stores player input for jumping. Needed since input is in Update and Jump is in FixedUpdate
     
     // Wall jump
-    private bool _isTouchingWall = false; // Tracks whether player can wall jump
+    private bool _isTouchingWall = false; // Primarily used for wall jumps
     private bool _wallOnRight; // Returns true if a wall the player is touching is on the right. Returns false if wall is on left. Used to walljump away from wall
 
-    //Friction manipulation
-    [SerializeField] private PhysicsMaterial2D _physicsMaterial;
-    private float _desiredFriction = 0.4f;
-    private bool _isTouchingSomething;
+    // Wings UI
+    [SerializeField] private GameObject _jumpIndicator;
 
     private void Awake()
     {
         // Starting values
-        _numberOfJumps = _maxJumps;
+        SetNumberOfJumps(_maxJumps);
 
         // Pointers
         _rigidbody = gameObject.GetComponent<Rigidbody2D>();
@@ -52,30 +51,8 @@ public class Player : Character
     private void FixedUpdate()
     {
         // Manage movement based on input
-        
         ManageHorizontalMovement();
         ManageJump();
-        //ManageFriction();
-    }
-
-    private void ManageFriction()
-    {
-        // While the player is sliding along the floor, we want them to have friction so they comes to a stop naturally
-        // However, when the player lands on the floor, we want a friction of 0, because otherwise the player loses speed on impact (it's jarring)
-        Debug.Log(_isTouchingSomething);
-        if(_isTouchingSomething)
-        {
-            gameObject.GetComponent<BoxCollider2D>().sharedMaterial.friction = _desiredFriction;
-            //gameObject.GetComponent<BoxCollider2D>().enabled = false;
-            //gameObject.GetComponent<BoxCollider2D>().enabled = true;
-        }
-        else
-        {
-            gameObject.GetComponent<BoxCollider2D>().sharedMaterial.friction = 0;
-            //gameObject.GetComponent<BoxCollider2D>().enabled = false;
-            //gameObject.GetComponent<BoxCollider2D>().enabled = true;
-
-        }
     }
 
     private void ManageHorizontalMovement()
@@ -99,9 +76,33 @@ public class Player : Character
         else if(_numberOfJumps > 0 && _wantsToJump)
         {
             Jump();
-            _numberOfJumps--;
+            SetNumberOfJumps(_numberOfJumps - 1);
+
         }
         _wantsToJump = false;
+    }
+
+    private void SetNumberOfJumps(int numJumps)
+    {
+        _numberOfJumps = numJumps;
+        // Jump UI
+            // Don't want to display first (grounded) jump, only double jumps
+        if(numJumps == _maxJumps)
+        {
+            numJumps--;
+        }
+        // Indicate each jump by enabling one sprite
+        foreach(Image jumpTracker in _jumpIndicator.GetComponentsInChildren<Image>())
+        {
+            if(numJumps-- > 0)
+            {
+                jumpTracker.enabled = true;
+            }
+            else
+            {
+                jumpTracker.enabled = false;
+            }
+        }
     }
 
     private void WallJump(bool wallOnRight)
@@ -125,12 +126,14 @@ public class Player : Character
         // Reset player's jumps when they touch the floor
         if (collision.collider.gameObject.layer == LayerMask.NameToLayer("Surface"))
         {
-            _numberOfJumps = _maxJumps;
+            SetNumberOfJumps(_maxJumps);
         }
 
         
         if (collision.collider.gameObject.layer == LayerMask.NameToLayer("Wall"))
         {
+            SetNumberOfJumps(_maxJumps);
+
             // Toggle whether player is touching a wall
             _isTouchingWall = true;
             // Set player's horizontal speed to 0
@@ -147,22 +150,13 @@ public class Player : Character
         //Invoke("ResetFriction", 2);
     }
 
-    private void ResetFriction()
-    {
-        Debug.Log("reset friction");
-        gameObject.GetComponent<BoxCollider2D>().sharedMaterial.friction = _desiredFriction;
-    }
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        // Used for friction manip
-        //_isTouchingSomething = false;
-        //gameObject.GetComponent<BoxCollider2D>().sharedMaterial.friction = 0;
-
         // If the player walks off a ledge, they lose their first jump
         if (_numberOfJumps == _maxJumps && collision.collider.gameObject.layer == LayerMask.NameToLayer("Surface"))
         {
-            _numberOfJumps--;
+            SetNumberOfJumps(_numberOfJumps - 1);
         }
 
         if (collision.collider.gameObject.layer == LayerMask.NameToLayer("Wall"))
@@ -175,5 +169,25 @@ public class Player : Character
     private void DisableWallJump()
     {
         _isTouchingWall = false;
-    }    
+    }
+
+    private void OnTriggerEnter2D(Collider2D collider)
+    {
+        GameObject colObject = collider.gameObject;
+        if(colObject.layer == LayerMask.NameToLayer("JumpUpgrade"))
+        {
+            // Bring upgrade to default layer so it no longer interacts with player
+            colObject.layer = LayerMask.NameToLayer("Default");
+            // Disable visuals, but allow current particles to finish their lifetime
+            colObject.GetComponent<SpriteRenderer>().enabled = false;
+            colObject.GetComponent<ParticleSystem>().Stop();
+            // Apply jump upgrade
+            UpgradeJump();
+        }
+    }
+    private void UpgradeJump()
+    {
+        _maxJumps++;
+        SetNumberOfJumps(_numberOfJumps + 1);
+    }
 }

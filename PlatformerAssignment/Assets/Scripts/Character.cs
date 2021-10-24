@@ -15,13 +15,13 @@ public class Character : MonoBehaviour
     [SerializeField] protected float _jumpVelocity; // How much to increase player's y velocity on jump
     [SerializeField] protected float _gravityScale; // Gravity scale, to play with floatiness
 
+    // Might be able to move jumping to player
+
 
     protected void Jump()
     {
         _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _jumpVelocity);
     }
-    
-    //protected void WallJump()
 
     protected void SetMovementSpeed(float horizontalVelocity)
     {
@@ -47,4 +47,14 @@ public class Character : MonoBehaviour
     {
 
     }
+
+    private void OnTriggerEnter2D(Collider2D collider)
+    {
+        if (collider.gameObject.layer == LayerMask.NameToLayer("Hazard"))
+        {
+            Die();
+        }
+    }
+    
+
 }
