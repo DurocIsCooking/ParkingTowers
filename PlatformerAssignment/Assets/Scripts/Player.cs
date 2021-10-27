@@ -11,15 +11,16 @@ public class Player : Character
 
     // Jumping
     private int _numberOfJumps;
-    private int _maxJumps = 2;
+    private int _maxJumps = 1;
     private bool _wantsToJump = false; // Stores player input for jumping. Needed since input is in Update and Jump is in FixedUpdate
     
     // Wall jump
     private bool _isTouchingWall = false; // Primarily used for wall jumps
     private bool _wallOnRight; // Returns true if a wall the player is touching is on the right. Returns false if wall is on left. Used to walljump away from wall
 
-    // Wings UI
+    // Wings upgrade
     [SerializeField] private GameObject _jumpIndicator;
+    private bool _foundWings = false;
 
     private void Awake()
     {
@@ -29,11 +30,13 @@ public class Player : Character
         // Pointers
         _rigidbody = gameObject.GetComponent<Rigidbody2D>();
         _rigidbody.gravityScale = _gravityScale;
+
     }
 
     private void Update()
     {
         CollectInput();
+        
     }
 
     private void CollectInput()
@@ -75,9 +78,8 @@ public class Player : Character
         }
         else if(_numberOfJumps > 0 && _wantsToJump)
         {
-            Jump();
+            Jump(); 
             SetNumberOfJumps(_numberOfJumps - 1);
-
         }
         _wantsToJump = false;
     }
@@ -107,7 +109,6 @@ public class Player : Character
 
     private void WallJump(bool wallOnRight)
     {
-        Debug.Log("Walljump");
         // No longer touching wall
         _isTouchingWall = false;
         // Wall jump sends the player outwards from the wall in addition to jumping normally
@@ -121,8 +122,10 @@ public class Player : Character
         SetMovementSpeed(wallJumpSpeed);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private new void OnCollisionEnter2D(Collision2D collision)
     {
+        base.OnCollisionEnter2D(collision);
+
         // Reset player's jumps when they touch the floor
         if (collision.collider.gameObject.layer == LayerMask.NameToLayer("Surface"))
         {
@@ -132,7 +135,8 @@ public class Player : Character
         
         if (collision.collider.gameObject.layer == LayerMask.NameToLayer("Wall"))
         {
-            SetNumberOfJumps(_maxJumps);
+            // Restore double jumps
+            SetNumberOfJumps(_maxJumps - 1);
 
             // Toggle whether player is touching a wall
             _isTouchingWall = true;
@@ -171,8 +175,9 @@ public class Player : Character
         _isTouchingWall = false;
     }
 
-    private void OnTriggerEnter2D(Collider2D collider)
+    private new void OnTriggerEnter2D(Collider2D collider)
     {
+        base.OnTriggerEnter2D(collider);
         GameObject colObject = collider.gameObject;
         if(colObject.layer == LayerMask.NameToLayer("JumpUpgrade"))
         {
@@ -187,7 +192,28 @@ public class Player : Character
     }
     private void UpgradeJump()
     {
+        if (!_foundWings)
+        {
+            Debug.Log("First jump upgrade");
+            // Display wings text
+            GameObject wingsText = _jumpIndicator.transform.GetChild(0).gameObject;
+            if (!wingsText.activeSelf)
+            {
+                wingsText.SetActive(true);
+            }
+            // Enable player wing sprites
+            foreach (SpriteRenderer spriteRenderer in transform.GetComponentsInChildren<SpriteRenderer>())
+            {
+                spriteRenderer.enabled = true;
+            }
+        }
+        // Increase available jumps
         _maxJumps++;
         SetNumberOfJumps(_numberOfJumps + 1);
+    }
+
+    protected override void PlayDeathAnimation()
+    {
+
     }
 }

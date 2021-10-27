@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Character : MonoBehaviour
+public abstract class Character : MonoBehaviour
 {
     //Rigidbody
     [SerializeField] protected Rigidbody2D _rigidbody;
@@ -37,18 +37,23 @@ public class Character : MonoBehaviour
         _rigidbody.velocity = (new Vector2(horizontalVelocity, _rigidbody.velocity.y));
     }
 
-    private void Die()
+    public void Die()
     {
         PlayDeathAnimation();
         Destroy(gameObject);
     }
 
-    private void PlayDeathAnimation()
-    {
+    protected abstract void PlayDeathAnimation();
 
+    protected void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.collider.gameObject.layer == LayerMask.NameToLayer("Hazard"))
+        {
+            Die();
+        }
     }
 
-    private void OnTriggerEnter2D(Collider2D collider)
+    protected void OnTriggerEnter2D(Collider2D collider)
     {
         if (collider.gameObject.layer == LayerMask.NameToLayer("Hazard"))
         {
