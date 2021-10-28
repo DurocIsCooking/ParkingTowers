@@ -1,15 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class MenuManager : MonoBehaviour
 {
-
-    [SerializeField] private GameObject _mainMenu;
     [SerializeField] private GameObject _pauseMenu;
-    [SerializeField] private GameObject _gameOverMenu;
+
+    // Whether the game is paused
+    public bool isPaused = false;
 
     // Singleton pattern
     private static MenuManager _instance;
@@ -34,25 +31,70 @@ public class MenuManager : MonoBehaviour
     private void Awake()
     {
         _instance = this;
-        OpenMainMenu(true);
         OpenPauseMenu(false);
-        OpenGameOverMenu(false, "Game over!");
     }
 
-    public void OpenMainMenu(bool isActive)
+    private void Update()
     {
-        _mainMenu.SetActive(isActive);
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            if(!isPaused)
+            {
+                PauseGame();
+            }
+            else
+            {
+                ResumeGame();
+            }    
+        }
     }
 
     public void OpenPauseMenu(bool isActive)
     {
-        _pauseMenu.SetActive(isActive);
+        // Since not all scenes contain a pause menu
+        if (_pauseMenu != null)
+        {
+            _pauseMenu.SetActive(isActive);
+        }
+
     }
 
-    public void OpenGameOverMenu(bool isActive, string gameOverText)
+    // Open / close pause menu
+
+    public void PauseGame()
     {
-        _gameOverMenu.SetActive(isActive);
-        _gameOverMenu.transform.GetChild(0).GetComponent<Text>().text = gameOverText;
+        OpenPauseMenu(true);
+        Time.timeScale = 0;
+        isPaused = true;
     }
 
+    public void ResumeGame()
+    {
+        OpenPauseMenu(false);
+        Time.timeScale = 1;
+        isPaused = false;
+    }
+
+    // Load scenes and quit game
+
+    public void LoadLevel1()
+    {
+        SceneManager.LoadScene("Level1");
+    }
+
+    public void LoadMainMenu()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+
+
+    public void LoadGameEndMenu(string gameOverText)
+    {
+        SceneManager.LoadScene("GameEndMenu");
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
 }

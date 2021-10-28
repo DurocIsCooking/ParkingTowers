@@ -194,7 +194,6 @@ public class Player : Character
     {
         if (!_foundWings)
         {
-            Debug.Log("First jump upgrade");
             // Display wings text
             GameObject wingsText = _jumpIndicator.transform.GetChild(0).gameObject;
             if (!wingsText.activeSelf)
