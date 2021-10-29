@@ -22,6 +22,10 @@ public class Player : Character
     [SerializeField] private GameObject _jumpIndicator;
     private bool _foundWings = false;
 
+    // Animation
+    [SerializeField] private Animator[] _wingsAnimators;
+    [SerializeField] private GameObject[] _wings;
+
     private void Awake()
     {
         // Starting values
@@ -31,6 +35,9 @@ public class Player : Character
         _rigidbody = gameObject.GetComponent<Rigidbody2D>();
         _rigidbody.gravityScale = _gravityScale;
 
+        // Animation
+        _wingsAnimators[0].SetBool("isLeftWing", true);
+        _wingsAnimators[1].SetBool("isLeftWing", false);
     }
 
     private void Update()
@@ -78,7 +85,12 @@ public class Player : Character
         }
         else if(_numberOfJumps > 0 && _wantsToJump)
         {
-            Jump(); 
+            Jump();
+            if(_numberOfJumps != _maxJumps)
+            {
+                _wingsAnimators[0].SetBool("useWings", true);
+                _wingsAnimators[1].SetBool("useWings", true);
+            }
             SetNumberOfJumps(_numberOfJumps - 1);
         }
         _wantsToJump = false;
@@ -135,9 +147,6 @@ public class Player : Character
         
         if (collision.collider.gameObject.layer == LayerMask.NameToLayer("Wall"))
         {
-            // Restore double jumps
-            SetNumberOfJumps(_maxJumps - 1);
-
             // Toggle whether player is touching a wall
             _isTouchingWall = true;
             // Set player's horizontal speed to 0
@@ -146,14 +155,6 @@ public class Player : Character
             _wallOnRight = (collision.GetContact(0).point.x > transform.position.x);
         }
     }
-
-    private void OnCollisionStay2D(Collision2D collision)
-    {
-        // Used for friction manip
-        //_isTouchingSomething = true;
-        //Invoke("ResetFriction", 2);
-    }
-
 
     private void OnCollisionExit2D(Collision2D collision)
     {
@@ -201,9 +202,9 @@ public class Player : Character
                 wingsText.SetActive(true);
             }
             // Enable player wing sprites
-            foreach (SpriteRenderer spriteRenderer in transform.GetComponentsInChildren<SpriteRenderer>())
+            foreach (GameObject wing in _wings)
             {
-                spriteRenderer.enabled = true;
+                wing.SetActive(true);
             }
         }
         // Increase available jumps
