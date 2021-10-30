@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class CarEnemy : Character
 {
-    [SerializeField] private bool _isFacingRight;
+    public bool IsFacingRight;
     [SerializeField] private GameObject _carExplosion;
 
-    private void Awake()
+    public void SetSpeed(float acceleration, float maxVelocity)
     {
-        if(!_isFacingRight)
+        _horizontalAcceleration = acceleration;
+        _maxHorizontalVelocity = maxVelocity;
+        if (!IsFacingRight)
         {
             transform.rotation = Quaternion.Euler(new Vector3(0, 180, 0));
         }
@@ -20,7 +22,7 @@ public class CarEnemy : Character
         // Add acceleration to current velocity
         float horizontalVelocity = Mathf.Abs(_rigidbody.velocity.x) + _horizontalAcceleration;
 
-        if (!_isFacingRight)
+        if (!IsFacingRight)
         {
             horizontalVelocity = -horizontalVelocity;
         }

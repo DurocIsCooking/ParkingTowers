@@ -12,7 +12,7 @@ public class Player : Character
 
     // Jumping
     private int _numberOfJumps;
-    private int _maxJumps = 1;
+    public static int MaxJumps = 1;
     private bool _wantsToJump = false; // Stores player input for jumping. Needed since input is in Update and Jump is in FixedUpdate
     
     // Wall jump
@@ -38,7 +38,7 @@ public class Player : Character
         {
             _jumpIndicator = MenuManager.Instance.JumpIndicator;
         }
-        SetNumberOfJumps(_maxJumps);
+        SetNumberOfJumps(MaxJumps);
         
         // Pointers
         _rigidbody = gameObject.GetComponent<Rigidbody2D>();
@@ -47,6 +47,11 @@ public class Player : Character
         // Animation
         _wingsAnimators[0].SetBool("isLeftWing", true);
         _wingsAnimators[1].SetBool("isLeftWing", false);
+
+        if(MaxJumps > 1)
+        {
+            EnableWingSprites();
+        }
     }
 
     private void Update()
@@ -103,7 +108,7 @@ public class Player : Character
     {
         base.Jump();
         _isTouchingSurface = false;
-        if (_numberOfJumps != _maxJumps)
+        if (_numberOfJumps != MaxJumps)
         {
             _wingsAnimators[0].SetBool("useWings", true);
             _wingsAnimators[1].SetBool("useWings", true);
@@ -117,6 +122,8 @@ public class Player : Character
         _isTouchingWall = false;
         // Wall jump sends the player outwards from the wall in addition to jumping normally
         Jump();
+        // Refund a jump, since walljump does not drain jumps
+        SetNumberOfJumps(_numberOfJumps + 1);
 
         float wallJumpSpeed = -10f;
         if(!wallOnRight)
@@ -131,7 +138,7 @@ public class Player : Character
         _numberOfJumps = numJumps;
         // Jump UI
         // Don't want to display first (grounded) jump, only double jumps
-        if (numJumps == _maxJumps)
+        if (numJumps == MaxJumps)
         {
             numJumps--;
         }
@@ -156,7 +163,7 @@ public class Player : Character
         // Reset player's jumps when they touch the floor
         if (collision.collider.gameObject.layer == LayerMask.NameToLayer("Surface"))
         {
-            SetNumberOfJumps(_maxJumps);
+            SetNumberOfJumps(MaxJumps);
             _isTouchingSurface = true;
         }
 
@@ -175,7 +182,7 @@ public class Player : Character
     private void OnCollisionExit2D(Collision2D collision)
     {
         // If the player walks off a ledge, they lose their first jump
-        if (_numberOfJumps == _maxJumps && collision.collider.gameObject.layer == LayerMask.NameToLayer("Surface"))
+        if (_numberOfJumps == MaxJumps && collision.collider.gameObject.layer == LayerMask.NameToLayer("Surface"))
         {
             _isTouchingSurface = false;
             SetNumberOfJumps(_numberOfJumps - 1);
@@ -223,15 +230,21 @@ public class Player : Character
             {
                 wingsText.SetActive(true);
             }
-            // Enable player wing sprites
-            foreach (GameObject wing in _wings)
-            {
-                wing.SetActive(true);
-            }
+
+            EnableWingSprites();
+            
         }
         // Increase available jumps
-        _maxJumps++;
+        MaxJumps++;
         SetNumberOfJumps(_numberOfJumps + 1);
+    }
+
+    private void EnableWingSprites()
+    {
+        foreach (GameObject wing in _wings)
+        {
+            wing.SetActive(true);
+        }
     }
 
     public override void Die()
@@ -246,4 +259,6 @@ public class Player : Character
     {
 
     }
+
+
 }

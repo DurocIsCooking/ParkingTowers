@@ -22,13 +22,10 @@ public class Spikes : MonoBehaviour
 
     private void Update()
     {
-        if(_isInCeiling)
+        if(_isInCeiling && CheckForPlayer())
         {
-            if (CheckForPlayer())
-            {
-                _isInCeiling = false;
-                _isFalling = true;
-            }
+            _isInCeiling = false;
+            _isFalling = true;
         }
         if(_isFalling)
         {
@@ -42,7 +39,7 @@ public class Spikes : MonoBehaviour
         RaycastHit2D[] hits = Physics2D.BoxCastAll(transform.position, new Vector2(0.5f, raycastRange * transform.localScale.y), 0, Vector2.down, 0f);
         foreach(RaycastHit2D hit in hits)
         {
-            if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Player"))
+            if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Player") && hit.transform.position.y < transform.position.y)
             {
                 // Deparent target
                 _target.transform.parent = null;

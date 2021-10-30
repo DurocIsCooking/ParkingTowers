@@ -98,11 +98,13 @@ public class MenuManager : MonoBehaviour
 
     public void LoadLevel1()
     {
+        Time.timeScale = 1;
         SceneManager.LoadScene("Level1");
     }
 
     public void LoadMainMenu()
     {
+        Player.MaxJumps = 1;
         SceneManager.LoadScene("MainMenu");
     }
 
