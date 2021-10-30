@@ -37,11 +37,7 @@ public abstract class Character : MonoBehaviour
         _rigidbody.velocity = (new Vector2(horizontalVelocity, _rigidbody.velocity.y));
     }
 
-    public void Die()
-    {
-        PlayDeathAnimation();
-        Destroy(gameObject);
-    }
+    public abstract void Die();
 
     protected abstract void PlayDeathAnimation();
 

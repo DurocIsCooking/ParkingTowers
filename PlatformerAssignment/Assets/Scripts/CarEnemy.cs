@@ -43,6 +43,12 @@ public class CarEnemy : Character
 
     }
 
+    public override void Die()
+    {
+        PlayDeathAnimation();
+        Destroy(gameObject);
+    }
+
     protected override void PlayDeathAnimation()
     {
         Instantiate(_carExplosion, transform.position, Quaternion.identity);

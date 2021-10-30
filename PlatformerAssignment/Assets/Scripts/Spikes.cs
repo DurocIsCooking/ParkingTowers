@@ -8,11 +8,27 @@ public class Spikes : MonoBehaviour
     [SerializeField] private bool _isInCeiling;
     private bool _isFalling;
 
+    [SerializeField] private GameObject _target; // Used to determine raycast range and stopping point of fall
+    private float raycastRange;
+
+    private void Awake()
+    {
+        if(_isInCeiling)
+        {
+            raycastRange = Mathf.Abs(_target.transform.localPosition.y * transform.localScale.y);
+        }
+        
+    }
+
     private void Update()
     {
         if(_isInCeiling)
         {
-            FireBoxCast();
+            if (CheckForPlayer())
+            {
+                _isInCeiling = false;
+                _isFalling = true;
+            }
         }
         if(_isFalling)
         {
@@ -21,24 +37,29 @@ public class Spikes : MonoBehaviour
 
     }
 
-    private void FireBoxCast()
+    private bool CheckForPlayer()
     {
-        RaycastHit2D hit = Physics2D.BoxCast(transform.position, new Vector2(0.5f, 0.5f), 0, Vector2.down, 30f);
-        if(hit.collider != null)
+        RaycastHit2D[] hits = Physics2D.BoxCastAll(transform.position, new Vector2(0.5f, raycastRange * transform.localScale.y), 0, Vector2.down, 0f);
+        foreach(RaycastHit2D hit in hits)
         {
-            Debug.Log(hit.collider.gameObject);
-            if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Player"))
+            if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Player"))
             {
-                _isInCeiling = false;
-                _isFalling = true;
+                // Deparent target
+                _target.transform.parent = null;
+                return true;
             }
         }
-        
+        return false;
     }
 
     private void Fall()
     {
         transform.position += Vector3.down * 0.05f;
+        // Stop at target
+        if(transform.position.y <= _target.transform.position.y)
+        {
+            _isFalling = false;
+        }
     }
 
 }

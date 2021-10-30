@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class Player : Character
 {
@@ -16,21 +17,29 @@ public class Player : Character
     
     // Wall jump
     private bool _isTouchingWall = false; // Primarily used for wall jumps
+    private bool _isTouchingSurface = false; // Used to make sure player cannot wall jump when touching a surface (sometimes player can clip through a surface and touch a wall)
     private bool _wallOnRight; // Returns true if a wall the player is touching is on the right. Returns false if wall is on left. Used to walljump away from wall
 
     // Wings upgrade
-    [SerializeField] private GameObject _jumpIndicator;
+    private GameObject _jumpIndicator;
     private bool _foundWings = false;
 
     // Animation
     [SerializeField] private Animator[] _wingsAnimators;
     [SerializeField] private GameObject[] _wings;
 
+    // Respawn point
+    public static Vector3 RespawnPoint;
+
     private void Awake()
     {
         // Starting values
+        if (MenuManager.Instance != null)
+        {
+            _jumpIndicator = MenuManager.Instance.JumpIndicator;
+        }
         SetNumberOfJumps(_maxJumps);
-
+        
         // Pointers
         _rigidbody = gameObject.GetComponent<Rigidbody2D>();
         _rigidbody.gravityScale = _gravityScale;
@@ -43,7 +52,6 @@ public class Player : Character
     private void Update()
     {
         CollectInput();
-        
     }
 
     private void CollectInput()
@@ -78,45 +86,29 @@ public class Player : Character
 
     private void ManageJump()
     {
+
         // Wall jump has priority over regular jumps and does not drain jump counter
-        if(_isTouchingWall && _wantsToJump)
+        if(_isTouchingWall && _wantsToJump && !_isTouchingSurface)
         {
             WallJump(_wallOnRight);
         }
         else if(_numberOfJumps > 0 && _wantsToJump)
         {
             Jump();
-            if(_numberOfJumps != _maxJumps)
-            {
-                _wingsAnimators[0].SetBool("useWings", true);
-                _wingsAnimators[1].SetBool("useWings", true);
-            }
-            SetNumberOfJumps(_numberOfJumps - 1);
         }
         _wantsToJump = false;
     }
-
-    private void SetNumberOfJumps(int numJumps)
+   
+    protected new void Jump()
     {
-        _numberOfJumps = numJumps;
-        // Jump UI
-            // Don't want to display first (grounded) jump, only double jumps
-        if(numJumps == _maxJumps)
+        base.Jump();
+        _isTouchingSurface = false;
+        if (_numberOfJumps != _maxJumps)
         {
-            numJumps--;
+            _wingsAnimators[0].SetBool("useWings", true);
+            _wingsAnimators[1].SetBool("useWings", true);
         }
-        // Indicate each jump by enabling one sprite
-        foreach(Image jumpTracker in _jumpIndicator.GetComponentsInChildren<Image>())
-        {
-            if(numJumps-- > 0)
-            {
-                jumpTracker.enabled = true;
-            }
-            else
-            {
-                jumpTracker.enabled = false;
-            }
-        }
+        SetNumberOfJumps(_numberOfJumps - 1);
     }
 
     private void WallJump(bool wallOnRight)
@@ -134,6 +126,29 @@ public class Player : Character
         SetMovementSpeed(wallJumpSpeed);
     }
 
+    private void SetNumberOfJumps(int numJumps)
+    {
+        _numberOfJumps = numJumps;
+        // Jump UI
+        // Don't want to display first (grounded) jump, only double jumps
+        if (numJumps == _maxJumps)
+        {
+            numJumps--;
+        }
+        // Indicate each jump by enabling one sprite
+        foreach (Image jumpTracker in _jumpIndicator.GetComponentsInChildren<Image>())
+        {
+            if (numJumps-- > 0)
+            {
+                jumpTracker.enabled = true;
+            }
+            else
+            {
+                jumpTracker.enabled = false;
+            }
+        }
+    }
+
     private new void OnCollisionEnter2D(Collision2D collision)
     {
         base.OnCollisionEnter2D(collision);
@@ -142,6 +157,7 @@ public class Player : Character
         if (collision.collider.gameObject.layer == LayerMask.NameToLayer("Surface"))
         {
             SetNumberOfJumps(_maxJumps);
+            _isTouchingSurface = true;
         }
 
         
@@ -161,6 +177,7 @@ public class Player : Character
         // If the player walks off a ledge, they lose their first jump
         if (_numberOfJumps == _maxJumps && collision.collider.gameObject.layer == LayerMask.NameToLayer("Surface"))
         {
+            _isTouchingSurface = false;
             SetNumberOfJumps(_numberOfJumps - 1);
         }
 
@@ -190,6 +207,11 @@ public class Player : Character
             // Apply jump upgrade
             UpgradeJump();
         }
+
+        if(colObject.layer == LayerMask.NameToLayer("Checkpoint"))
+        {
+            RespawnPoint = colObject.transform.position;
+        }
     }
     private void UpgradeJump()
     {
@@ -210,6 +232,14 @@ public class Player : Character
         // Increase available jumps
         _maxJumps++;
         SetNumberOfJumps(_numberOfJumps + 1);
+    }
+
+    public override void Die()
+    {
+            MenuManager.Instance.OpenDeathMenu();
+            PlayDeathAnimation();
+            Destroy(gameObject);
+        
     }
 
     protected override void PlayDeathAnimation()

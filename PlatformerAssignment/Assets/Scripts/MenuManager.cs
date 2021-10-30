@@ -4,6 +4,10 @@ using UnityEngine.SceneManagement;
 public class MenuManager : MonoBehaviour
 {
     [SerializeField] private GameObject _pauseMenu;
+    [SerializeField] private GameObject _deathMenu;
+    [SerializeField] private GameObject _player;
+    [SerializeField] private GameObject _camera;
+    public GameObject JumpIndicator;
 
     // Whether the game is paused
     public bool isPaused = false;
@@ -49,18 +53,7 @@ public class MenuManager : MonoBehaviour
         }
     }
 
-    public void OpenPauseMenu(bool isActive)
-    {
-        // Since not all scenes contain a pause menu
-        if (_pauseMenu != null)
-        {
-            _pauseMenu.SetActive(isActive);
-        }
-
-    }
-
     // Open / close pause menu
-
     public void PauseGame()
     {
         OpenPauseMenu(true);
@@ -73,6 +66,32 @@ public class MenuManager : MonoBehaviour
         OpenPauseMenu(false);
         Time.timeScale = 1;
         isPaused = false;
+    }
+    public void OpenPauseMenu(bool isActive)
+    {
+        // Since not all scenes contain a pause menu
+        if (_pauseMenu != null)
+        {
+            _pauseMenu.SetActive(isActive);
+        }
+
+    }
+
+    // Death menu
+    public void OpenDeathMenu()
+    {
+        if(_deathMenu != null)
+        {
+            _deathMenu.SetActive(true);
+        }
+    }
+
+    public void RespawnPlayer()
+    {
+        _deathMenu.SetActive(false);
+        // Spawn player, attach the camera to them, and give them pointer to jump indicator
+        GameObject newPlayer = Instantiate(_player, Player.RespawnPoint, Quaternion.identity);
+        CameraMovement.Instance.AttachCameraToPlayer(newPlayer);
     }
 
     // Load scenes and quit game
