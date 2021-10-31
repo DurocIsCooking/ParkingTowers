@@ -13,8 +13,10 @@ public class Player : Character
     // Jumping
     private int _numberOfJumps;
     public static int MaxJumps = 1;
+    private int _jumpCap = 4; // Highest number of jumps the player can get access to
     private bool _wantsToJump = false; // Stores player input for jumping. Needed since input is in Update and Jump is in FixedUpdate
-    
+    [SerializeField] protected float _jumpVelocity; // How much to increase player's y velocity on jump
+
     // Wall jump
     private bool _isTouchingWall = false; // Primarily used for wall jumps
     private bool _isTouchingSurface = false; // Used to make sure player cannot wall jump when touching a surface (sometimes player can clip through a surface and touch a wall)
@@ -104,9 +106,10 @@ public class Player : Character
         _wantsToJump = false;
     }
    
-    protected new void Jump()
+    private void Jump()
     {
-        base.Jump();
+        
+        _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _jumpVelocity);
         _isTouchingSurface = false;
         if (_numberOfJumps != MaxJumps)
         {
@@ -219,6 +222,11 @@ public class Player : Character
         {
             RespawnPoint = colObject.transform.position;
         }
+
+        if(colObject.layer == LayerMask.NameToLayer("Victory"))
+        {
+            MenuManager.Instance.LoadGameEndMenu();
+        }
     }
     private void UpgradeJump()
     {
@@ -235,8 +243,11 @@ public class Player : Character
             
         }
         // Increase available jumps
-        MaxJumps++;
-        SetNumberOfJumps(_numberOfJumps + 1);
+        if(MaxJumps < _jumpCap)
+        {
+            MaxJumps++;
+            SetNumberOfJumps(_numberOfJumps + 1);
+        }
     }
 
     private void EnableWingSprites()
@@ -257,7 +268,7 @@ public class Player : Character
 
     protected override void PlayDeathAnimation()
     {
-
+        // I haven't had time to add a death animation for the player, but this is where I would put it :)
     }
 
 

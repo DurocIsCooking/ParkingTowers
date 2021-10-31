@@ -7,21 +7,12 @@ public abstract class Character : MonoBehaviour
     //Rigidbody
     [SerializeField] protected Rigidbody2D _rigidbody;
 
-    // Horizontal movement (these might not be needed here hmmmmm)
+    // Horizontal movement
     [SerializeField] protected float _horizontalAcceleration;
     [SerializeField] protected float _maxHorizontalVelocity;
 
-    // Jumping
-    [SerializeField] protected float _jumpVelocity; // How much to increase player's y velocity on jump
-    [SerializeField] protected float _gravityScale; // Gravity scale, to play with floatiness
-
-    // Might be able to move jumping to player
-
-
-    protected void Jump()
-    {
-        _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _jumpVelocity);
-    }
+    // Gravity scale, to play with floatiness
+    [SerializeField] protected float _gravityScale;
 
     protected void SetMovementSpeed(float horizontalVelocity)
     {

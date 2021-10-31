@@ -109,7 +109,7 @@ public class MenuManager : MonoBehaviour
     }
 
 
-    public void LoadGameEndMenu(string gameOverText)
+    public void LoadGameEndMenu()
     {
         SceneManager.LoadScene("GameEndMenu");
     }

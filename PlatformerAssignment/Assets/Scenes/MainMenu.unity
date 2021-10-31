@@ -150,7 +150,7 @@ RectTransform:
   m_GameObject: {fileID: 206845729}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 8.368493, y: 4.7819924, z: 4.7819924}
+  m_LocalScale: {x: 8.368493, y: 5.9177155, z: 4.7819924}
   m_Children:
   - {fileID: 1926333959}
   - {fileID: 1906913612}
@@ -229,7 +229,7 @@ RectTransform:
   m_GameObject: {fileID: 295115412}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.15275162, y: 0.26731536, z: 0.26731536}
+  m_LocalScale: {x: 0.15275162, y: 0.21601245, z: 0.26731542}
   m_Children:
   - {fileID: 531007758}
   m_Father: {fileID: 206845730}
@@ -237,7 +237,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -21.49215}
+  m_AnchoredPosition: {x: 0, y: -17.367393}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &295115414
@@ -692,6 +692,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pauseMenu: {fileID: 0}
+  _deathMenu: {fileID: 0}
+  _player: {fileID: 0}
+  _camera: {fileID: 0}
+  JumpIndicator: {fileID: 0}
   isPaused: 0
 --- !u!4 &1154114928
 Transform:
@@ -814,7 +818,7 @@ RectTransform:
   m_GameObject: {fileID: 1906913611}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.15275162, y: 0.26731536, z: 0.26731536}
+  m_LocalScale: {x: 0.15275162, y: 0.21601245, z: 0.26731542}
   m_Children:
   - {fileID: 1785625250}
   m_Father: {fileID: 206845730}
@@ -822,7 +826,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -11.147053}
+  m_AnchoredPosition: {x: 0, y: -9.007721}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1906913613
@@ -947,14 +951,14 @@ RectTransform:
   m_GameObject: {fileID: 1926333958}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.04445225, y: 0.07779144, z: 0.07779144}
+  m_LocalScale: {x: 0.04445225, y: 0.06286178, z: 0.07779145}
   m_Children: []
   m_Father: {fileID: 206845730}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 11}
+  m_AnchoredPosition: {x: 0, y: 8.888882}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1926333960
@@ -1005,7 +1009,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: Title
+  m_Text: Parking Towers
 --- !u!222 &1926333962
 CanvasRenderer:
   m_ObjectHideFlags: 0

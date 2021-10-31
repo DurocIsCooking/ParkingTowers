@@ -1,21 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class Spikes : MonoBehaviour
 {
 
     [SerializeField] private bool _isInCeiling;
     private bool _isFalling;
+    private float _fallDurationMultiplier = 0.075f; // Smaller = faster
 
     [SerializeField] private GameObject _target; // Used to determine raycast range and stopping point of fall
-    private float raycastRange;
+    private float _raycastRange;
 
     private void Awake()
     {
         if(_isInCeiling)
         {
-            raycastRange = Mathf.Abs(_target.transform.localPosition.y * transform.localScale.y);
+            _raycastRange = Mathf.Abs(_target.transform.localPosition.y * transform.localScale.y);
+            foreach(SpriteRenderer spriteRenderer in GetComponentsInChildren<SpriteRenderer>())
+            {
+                spriteRenderer.color = new Color(1, 0.6839622f, 0.6839622f);
+            }
         }
         
     }
@@ -36,7 +42,9 @@ public class Spikes : MonoBehaviour
 
     private bool CheckForPlayer()
     {
-        RaycastHit2D[] hits = Physics2D.BoxCastAll(transform.position, new Vector2(0.5f, raycastRange * transform.localScale.y), 0, Vector2.down, 0f);
+        // I don't understand why I had to factor in the scale of the parent object (transform.localscale.y) both here and in the awake function
+        // It seems to me this should only be required once
+        RaycastHit2D[] hits = Physics2D.BoxCastAll(transform.position, new Vector2(0.5f, _raycastRange * transform.localScale.y), 0, Vector2.down, 0f);
         foreach(RaycastHit2D hit in hits)
         {
             if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Player") && hit.transform.position.y < transform.position.y)
@@ -51,12 +59,10 @@ public class Spikes : MonoBehaviour
 
     private void Fall()
     {
-        transform.position += Vector3.down * 0.05f;
-        // Stop at target
-        if(transform.position.y <= _target.transform.position.y)
-        {
-            _isFalling = false;
-        }
+        TweenParams fallParams = new TweenParams().SetEase(Ease.OutBounce);
+        float duration = (transform.position.y - _target.transform.position.y) * _fallDurationMultiplier;
+        transform.DOMoveY(_target.transform.position.y, duration).SetAs(fallParams);
+        _isFalling = false;
     }
 
 }

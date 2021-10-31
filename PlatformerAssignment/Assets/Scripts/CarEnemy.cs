@@ -47,12 +47,29 @@ public class CarEnemy : Character
 
     public override void Die()
     {
+        // Disable colliders and play animation
+        foreach(Collider2D collider in GetComponentsInChildren<Collider2D>())
+        {
+            collider.enabled = false;
+        }
+        // Stop car from moving while death animation plays
+        _rigidbody.gravityScale = 0;
+        _rigidbody.velocity = Vector2.zero;
+        _rigidbody.angularVelocity = 0;
+        _horizontalAcceleration = 0;
+
         PlayDeathAnimation();
-        Destroy(gameObject);
     }
 
     protected override void PlayDeathAnimation()
     {
+        GetComponent<Animator>().SetBool("destroyed", true);
         Instantiate(_carExplosion, transform.position, Quaternion.identity);
+    }
+
+    // Called by an animation event
+    public void DestroyCar()
+    {
+        Destroy(gameObject);
     }
 }
