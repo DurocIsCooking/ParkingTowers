@@ -249,7 +249,6 @@ MonoBehaviour:
   _rigidbody: {fileID: 5427255375032898690}
   _horizontalAcceleration: 0.2
   _maxHorizontalVelocity: 25
-  _jumpVelocity: 0
   _gravityScale: 7
   IsFacingRight: 0
   _carExplosion: {fileID: 6152169757392189122, guid: 114e4f73a7df646498a5cde010692a14, type: 3}

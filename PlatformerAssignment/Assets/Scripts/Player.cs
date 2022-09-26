@@ -1,12 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using DG.Tweening;
 
+// This script controls the player's input, movement, and animations. Inherits from Character.
 public class Player : Character
 {
-
     // Horizontal movement
     private float _horizontalInput;
 
@@ -15,7 +12,7 @@ public class Player : Character
     public static int MaxJumps = 1;
     private int _jumpCap = 4; // Highest number of jumps the player can get access to
     private bool _wantsToJump = false; // Stores player input for jumping. Needed since input is in Update and Jump is in FixedUpdate
-    [SerializeField] protected float _jumpVelocity; // How much to increase player's y velocity on jump
+    [SerializeField] protected float _jumpVelocity;
 
     // Wall jump
     private bool _isTouchingWall = false; // Primarily used for wall jumps
@@ -42,7 +39,7 @@ public class Player : Character
         }
         SetNumberOfJumps(MaxJumps);
         
-        // Pointers
+        // Rigidbody
         _rigidbody = gameObject.GetComponent<Rigidbody2D>();
         _rigidbody.gravityScale = _gravityScale;
 
@@ -87,14 +84,11 @@ public class Player : Character
         
         // Move
         SetMovementSpeed(horizontalVelocity);
-
-        // Reset friction if touching something
     }
 
     private void ManageJump()
     {
-
-        // Wall jump has priority over regular jumps and does not drain jump counter
+        // Wall jump has priority over regular jumps and does not cost a jump
         if(_isTouchingWall && _wantsToJump && !_isTouchingSurface)
         {
             WallJump(_wallOnRight);
@@ -108,7 +102,7 @@ public class Player : Character
    
     private void Jump()
     {
-        
+        // Add force, trigger animations, and decrement number of jumps
         _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _jumpVelocity);
         _isTouchingSurface = false;
         if (_numberOfJumps != MaxJumps)
@@ -121,13 +115,13 @@ public class Player : Character
 
     private void WallJump(bool wallOnRight)
     {
-        // No longer touching wall
-        _isTouchingWall = false;
         // Wall jump sends the player outwards from the wall in addition to jumping normally
+        _isTouchingWall = false;
         Jump();
-        // Refund a jump, since walljump does not drain jumps
+        // Refund a jump, since walljump does not cost a jump, and the jump method decrements jumps
         SetNumberOfJumps(_numberOfJumps + 1);
 
+        // Horizontal movement
         float wallJumpSpeed = -10f;
         if(!wallOnRight)
         {
@@ -136,19 +130,21 @@ public class Player : Character
         SetMovementSpeed(wallJumpSpeed);
     }
 
+    // Sets number of jumps and manages wings UI
     private void SetNumberOfJumps(int numJumps)
     {
         _numberOfJumps = numJumps;
-        // Jump UI
-        // Don't want to display first (grounded) jump, only double jumps
-        if (numJumps == MaxJumps)
+
+        // Here we enable one wings UI sprite for each airjump available
+        int wingsUICount = numJumps;
+        if (wingsUICount == MaxJumps) // We don't want to display a sprite for the ground jump
         {
-            numJumps--;
+            wingsUICount--;
         }
         // Indicate each jump by enabling one sprite
         foreach (Image jumpTracker in _jumpIndicator.GetComponentsInChildren<Image>())
         {
-            if (numJumps-- > 0)
+            if (wingsUICount-- > 0)
             {
                 jumpTracker.enabled = true;
             }
@@ -170,7 +166,7 @@ public class Player : Character
             _isTouchingSurface = true;
         }
 
-        
+        // On wall collision, get ready to walljump if needed
         if (collision.collider.gameObject.layer == LayerMask.NameToLayer("Wall"))
         {
             // Toggle whether player is touching a wall
@@ -191,13 +187,14 @@ public class Player : Character
             SetNumberOfJumps(_numberOfJumps - 1);
         }
 
+        // When the player leaves contact with the wall, disable wall jump after a slight buffer
         if (collision.collider.gameObject.layer == LayerMask.NameToLayer("Wall"))
         {
-            // Disable wall jump after a slight buffer
             Invoke("DisableWallJump", 0.08f);
         }
     }
 
+    // Removes ability to wall jump
     private void DisableWallJump()
     {
         _isTouchingWall = false;
@@ -207,27 +204,33 @@ public class Player : Character
     {
         base.OnTriggerEnter2D(collider);
         GameObject colObject = collider.gameObject;
+
+        // Jump upgrade collision
         if(colObject.layer == LayerMask.NameToLayer("JumpUpgrade"))
         {
             // Bring upgrade to default layer so it no longer interacts with player
             colObject.layer = LayerMask.NameToLayer("Default");
-            // Disable visuals, but allow current particles to finish their lifetime
+            // Disable visuals, but do not destroy the gameobject so that particles can finish their lifetime
             colObject.GetComponent<SpriteRenderer>().enabled = false;
             colObject.GetComponent<ParticleSystem>().Stop();
             // Apply jump upgrade
             UpgradeJump();
         }
 
+        // Set checkpoint
         if(colObject.layer == LayerMask.NameToLayer("Checkpoint"))
         {
             RespawnPoint = colObject.transform.position;
         }
 
+        // Victory
         if(colObject.layer == LayerMask.NameToLayer("Victory"))
         {
             MenuManager.Instance.LoadGameEndMenu();
         }
     }
+
+    // Gives the player an additional air jump, and makes wings + wingsUI visible if needed.
     private void UpgradeJump()
     {
         if (!_foundWings)
@@ -250,6 +253,7 @@ public class Player : Character
         }
     }
 
+    // Make wings visible
     private void EnableWingSprites()
     {
         foreach (GameObject wing in _wings)
@@ -258,12 +262,12 @@ public class Player : Character
         }
     }
 
+    // Destroys the player and opens death menu
     public override void Die()
     {
             MenuManager.Instance.OpenDeathMenu();
             PlayDeathAnimation();
-            Destroy(gameObject);
-        
+            Destroy(gameObject);    
     }
 
     protected override void PlayDeathAnimation()

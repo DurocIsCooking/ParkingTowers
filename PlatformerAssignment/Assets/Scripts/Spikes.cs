@@ -1,18 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
 public class Spikes : MonoBehaviour
 {
 
-    [SerializeField] private bool _isInCeiling;
+    [SerializeField] private bool _isInCeiling; // If true, these spikes are shaded pink on awake, and will fall when the player passes beneath.
     private bool _isFalling;
     private float _fallDurationMultiplier = 0.075f; // Smaller = faster
 
-    [SerializeField] private GameObject _target; // Used to determine raycast range and stopping point of fall
+    [SerializeField] private GameObject _target; // A child object used to determine stopping point of fall, and range of raycast used to check for player.
     private float _raycastRange;
 
+    // If this is a falling set of spikes, shade pink and set parameters
     private void Awake()
     {
         if(_isInCeiling)
@@ -22,10 +21,10 @@ public class Spikes : MonoBehaviour
             {
                 spriteRenderer.color = new Color(1, 0.6839622f, 0.6839622f);
             }
-        }
-        
+        }  
     }
 
+    // Raycast beneath for player. If the player is found, start falling.
     private void Update()
     {
         if(_isInCeiling && CheckForPlayer())
@@ -37,13 +36,11 @@ public class Spikes : MonoBehaviour
         {
             Fall();
         }
-
     }
 
+    // Fire a boxcast beneath the spikes. If the player is found, return true.
     private bool CheckForPlayer()
     {
-        // I don't understand why I had to factor in the scale of the parent object (transform.localscale.y) both here and in the awake function
-        // It seems to me this should only be required once
         RaycastHit2D[] hits = Physics2D.BoxCastAll(transform.position, new Vector2(0.5f, _raycastRange * transform.localScale.y), 0, Vector2.down, 0f);
         foreach(RaycastHit2D hit in hits)
         {
@@ -57,6 +54,7 @@ public class Spikes : MonoBehaviour
         return false;
     }
 
+    // Using DoTween to control speed of fall and bounce at the end.
     private void Fall()
     {
         TweenParams fallParams = new TweenParams().SetEase(Ease.OutBounce);

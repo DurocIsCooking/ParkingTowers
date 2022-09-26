@@ -1,7 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+// This script is placed on the windshield object, a child of the car enemy. It simply makes the car explode when the windshield collides with anything.
 public class CarWindshield : MonoBehaviour
 {
     CarEnemy car;

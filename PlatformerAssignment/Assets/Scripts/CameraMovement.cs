@@ -1,7 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+// Controls camera movement. The camera follows the player with a position buffer.
 public class CameraMovement : MonoBehaviour
 {
     [SerializeField] private GameObject _player;

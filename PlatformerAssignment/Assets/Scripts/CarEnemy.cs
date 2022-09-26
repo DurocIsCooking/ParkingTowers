@@ -1,12 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+// Controls cars. Inherits from Character.
 public class CarEnemy : Character
 {
     public bool IsFacingRight;
-    [SerializeField] private GameObject _carExplosion;
+    [SerializeField] private GameObject _carExplosion; // Reference to a prefab with a particle system of oily droplets.
 
+    // Sets the car's speed on spawn. Their velocity always starts at 0.
     public void SetSpeed(float acceleration, float maxVelocity)
     {
         _horizontalAcceleration = acceleration;
@@ -38,6 +38,7 @@ public class CarEnemy : Character
 
         GameObject collisionObject = collision.collider.gameObject;
 
+        // Dies when it hits a wall. Horizontal surfaces are not tagged as walls.
         if (collisionObject.layer == LayerMask.NameToLayer("Wall"))
         {
             Die();
@@ -57,7 +58,6 @@ public class CarEnemy : Character
         _rigidbody.velocity = Vector2.zero;
         _rigidbody.angularVelocity = 0;
         _horizontalAcceleration = 0;
-
         PlayDeathAnimation();
     }
 
